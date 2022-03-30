@@ -2,6 +2,7 @@ import os
 import pyttsx3
 import wikipedia
 from moviepy.editor import concatenate_audioclips, AudioFileClip
+from pydub import AudioSegment
 
 articles_to_get = open("people_to_transcribe.txt", "r").readlines()
 
@@ -23,10 +24,13 @@ def scrape_wikipedia(articles_to_get):
             p = wikipedia.page(article, auto_suggest=False)
             content = p.content.split('== See also ==')[0]
 
-            engine.save_to_file(content, f'./output_wav/{article}.wav')
+            engine.save_to_file(content, f'./output_mp3/{article}.mp3')
 
             # run and wait method, it processes the voice commands.
             engine.runAndWait()
+
+            sound = AudioSegment.from_file(f'./output_mp3/{article}.mp3')
+            sound.export(f"./output_mp3/{article}.mp3", format="mp3", bitrate="128k")
 
         except Exception as err:
             print(err)
@@ -38,7 +42,7 @@ def concatenate_audio_moviepy(audio_clip_paths, output_path):
     final_clip.write_audiofile(os.path.join(output_path, 'combined.mp3'))
 
 
-all_files = os.listdir('./output_wav')
+all_files = os.listdir('./output_mp3')
 
 scrape_wikipedia(articles_to_get)
-concatenate_audio_moviepy(all_files, './output_wav')
+concatenate_audio_moviepy(all_files, './output_mp3')
