@@ -3,6 +3,7 @@ import os
 import pyttsx3
 import wikipedia
 from pydub import AudioSegment
+from moviepy.editor import concatenate_audioclips, AudioFileClip
 
 articles_to_get = open("people_to_transcribe.txt", "r").readlines()
 
@@ -14,34 +15,32 @@ volume = engine.getProperty('volume')
 engine.setProperty('volume', 0.01)
 
 
-for article in articles_to_get:
+def scrape_wikipedia(articles_to_get):
+    for article in articles_to_get:
 
-    try:
+        try:
 
-        article = article.strip()
+            article = article.strip()
 
-        p = wikipedia.page(article, auto_suggest=False)
-        content = p.content.split('== See also ==')[0]
+            p = wikipedia.page(article, auto_suggest=False)
+            content = p.content.split('== See also ==')[0]
 
-        engine.save_to_file(content, f'./mp3_output/{article}.wav')
+            engine.save_to_file(content, f'./mp3_output/{article}.wav')
 
-        # run and wait method, it processes the voice commands.
-        engine.runAndWait()
+            # run and wait method, it processes the voice commands.
+            engine.runAndWait()
 
-    except Exception as err:
-        print(err)
+        except Exception as err:
+            print(err)
 
 
-all_files = os.listdir('./mp3_output')
+def concatenate_audio_moviepy(audio_clip_paths, output_path):
+    clips = [AudioFileClip(os.path.join(output_path, c)) for c in audio_clip_paths]
+    final_clip = concatenate_audioclips(clips)
+    final_clip.write_audiofile(os.path.join(output_path, 'combined.mp3'))
 
-combined = []
 
-for file in all_files:
-    print(file)
-    try:
-        audio = AudioSegment.from_mp3(f'./mp3_output/{file}')
-        combined.append(audio)
-    except Exception as err:
-        print(err)
+all_files = os.listdir('./output_wav')
 
-combined.export(f"./mp3_output/combined_output.wav", format="wav")
+scrape_wikipedia(articles_to_get)
+concatenate_audio_moviepy(all_files, './output_wav')
