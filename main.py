@@ -1,8 +1,6 @@
 import os
-
 import pyttsx3
 import wikipedia
-from pydub import AudioSegment
 from moviepy.editor import concatenate_audioclips, AudioFileClip
 
 articles_to_get = open("people_to_transcribe.txt", "r").readlines()
@@ -25,7 +23,7 @@ def scrape_wikipedia(articles_to_get):
             p = wikipedia.page(article, auto_suggest=False)
             content = p.content.split('== See also ==')[0]
 
-            engine.save_to_file(content, f'./mp3_output/{article}.wav')
+            engine.save_to_file(content, f'./output_wav/{article}.wav')
 
             # run and wait method, it processes the voice commands.
             engine.runAndWait()
